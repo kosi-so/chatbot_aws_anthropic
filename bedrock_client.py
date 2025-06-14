@@ -13,14 +13,9 @@ bedrock_client = boto3.client(
 
 )
 
-def query_bedrock_claude(prompt:str):
+def query_bedrock_claude(message_history:list):
     body ={
-        "messages":[
-            {
-                "role": "user",
-                "content": prompt
-            }
-        ],
+        "messages": message_history,
         "max_tokens": 300,
         "temperature":0.7,
         "anthropic_version": "bedrock-2023-05-31"

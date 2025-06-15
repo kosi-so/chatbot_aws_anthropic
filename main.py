@@ -33,7 +33,10 @@ def chat(input: ChatInput):
     reply = query_bedrock_claude(chat_history)
 
     # Add model's reply to chat history
-    chat_history.append({"role": "assistant", "content": reply})
+    if reply:
+        chat_history.append({"role": "assistant", "content": reply})
+    else:
+        chat_history.append({"role": "assistant", "content": "[No response received]"})
 
     return {"response": reply}
 

@@ -14,5 +14,18 @@ This is a full-stack AI chatbot built using **Anthropic's Claude model** via **A
 - 🧠 Session memory support (in-memory)
 
 ---
+## 📁 Project Structure
 
-
+chatbot_aws_anthropic/ \
+│\
+├── backend/ # FastAPI app \
+│ ├── main.py # API endpoints + CORS + chat history\
+│ ├── bedrock_client.py # Claude 3.5 message API handler\
+│ └── .env # AWS credentials\
+│\
+├── frontend/ # React app\
+│ ├── src/\
+│ │ └── App.js # Chat UI logic\
+│ └── package.json\
+│\
+└── README.md\

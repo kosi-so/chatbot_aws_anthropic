@@ -25,7 +25,7 @@ def query_bedrock_claude(message_history:list):
     for attempt in range(5):
         try:
             response = bedrock_client.invoke_model(
-        modelId="anthropic.claude-3-5-sonnet-20241022-v2:0",
+        modelId="anthropic.claude-3-sonnet-20240229-v1:0",
         body=json.dumps(body),
         contentType='application/json',
         accept='application/json'

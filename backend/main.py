@@ -10,8 +10,8 @@ chat_history = []          # This will store the chat history
 # Middleware to handle CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],
-    allow_credentials=True,  
+    allow_origins=["http://chatbot-frontend-public.s3-website-ap-southeast-2.amazonaws.com"],  
+    allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
@@ -20,23 +20,29 @@ app.add_middleware(
 class ChatInput(BaseModel):
     prompt: str
 
+@app.get("/health")
+def health_check():
+    return {"status": "ok"}
+
 @app.post("/chat")
 def chat(input: ChatInput):
     global chat_history
 
-    # Add new user message to chat history
-    chat_history.append({"role": "user", "content": input.prompt})
+    if chat_history and chat_history[-1]["role"] == "user":
+    # If the last message was also from user, replace it
+        chat_history[-1] = {"role": "user", "content": input.prompt}
+    else:
+        chat_history.append({"role": "user", "content": input.prompt})
 
-    time.sleep(1.2)  # Simulate a delay for the model to process
+    try:
+        reply = query_bedrock_claude(chat_history)
+    except Exception as e:
+        print("Error calling Bedrock:", e)
+        return {"response": f"[Error: {e}]"}  # Surface the error for testing
 
-    # Query model with the updated chat history
-    reply = query_bedrock_claude(chat_history)
-
-    # Add model's reply to chat history
     if reply:
         chat_history.append({"role": "assistant", "content": reply})
     else:
         chat_history.append({"role": "assistant", "content": "[No response received]"})
 
     return {"response": reply}
-

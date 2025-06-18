@@ -55,6 +55,12 @@ jobs:
             --cli-input-json file://new-task-def.json \
             | jq -r '.taskDefinition.taskDefinitionArn')
 
+          if [ -z "$TASK_REVISION" ]; then
+            echo "❌ Failed to extract task definition ARN"
+            exit 1
+          fi
+
+          echo "✅ Registered new task: $TASK_REVISION"
           echo "TASK_REVISION=$TASK_REVISION" >> $GITHUB_ENV
 
       - name: Update ECS service with new task definition

@@ -37,17 +37,19 @@ jobs:
 
           IMAGE="${{ secrets.ECR_BACKEND_REPO }}:latest"
 
-          NEW_TASK_DEF=$(jq ".taskDefinition |
+          NEW_TASK_DEF=$(jq --arg IMAGE "$IMAGE" '
+            .taskDefinition |
             {
-              family: .family,
-              networkMode: .networkMode,
-              requiresCompatibilities: .requiresCompatibilities,
-              cpu: .cpu,
-              memory: .memory,
-              executionRoleArn: .executionRoleArn,
-              taskRoleArn: .taskRoleArn,
-              containerDefinitions: [.containerDefinitions[0] | .image = \"$IMAGE\"]
-            }" task-def.json)
+              family,
+              networkMode,
+              requiresCompatibilities,
+              cpu,
+              memory,
+              containerDefinitions: [.containerDefinitions[0] | .image = $IMAGE]
+            } +
+            if .executionRoleArn != null then {executionRoleArn} else {} end +
+            if .taskRoleArn != null then {taskRoleArn} else {} end
+          ' task-def.json)
 
           echo "$NEW_TASK_DEF" > new-task-def.json
 
@@ -55,12 +57,6 @@ jobs:
             --cli-input-json file://new-task-def.json \
             | jq -r '.taskDefinition.taskDefinitionArn')
 
-          if [ -z "$TASK_REVISION" ]; then
-            echo "❌ Failed to extract task definition ARN"
-            exit 1
-          fi
-
-          echo "✅ Registered new task: $TASK_REVISION"
           echo "TASK_REVISION=$TASK_REVISION" >> $GITHUB_ENV
 
       - name: Update ECS service with new task definition
